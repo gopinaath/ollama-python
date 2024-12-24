@@ -2,7 +2,10 @@ from pathlib import Path
 from pydantic import BaseModel
 from typing import Literal
 from ollama import chat
+import json
 
+# model='llama3.2-vision'
+model='llama3.2-vision-tools'
 
 # Define the schema for image objects
 class Object(BaseModel):
@@ -22,8 +25,9 @@ class ImageDescription(BaseModel):
 
 
 # Get path from user input
-path = input('Enter the path to your image: ')
-path = Path(path)
+# path = input('Enter the path to your image: ')
+# path = Path(path)
+path = Path('./examples/test-image-1.jpg')
 
 # Verify the file exists
 if not path.exists():
@@ -31,7 +35,7 @@ if not path.exists():
 
 # Set up chat as usual
 response = chat(
-  model='llama3.2-vision',
+  model=model,
   format=ImageDescription.model_json_schema(),  # Pass in the schema for the response
   messages=[
     {
@@ -43,7 +47,10 @@ response = chat(
   options={'temperature': 0},  # Set temperature to 0 for more deterministic output
 )
 
+# print (response)
 
 # Convert received content to the schema
 image_analysis = ImageDescription.model_validate_json(response.message.content)
 print(image_analysis)
+
+print(json.dumps(image_analysis.model_dump(), indent=2))
